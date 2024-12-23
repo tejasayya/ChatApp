@@ -1,15 +1,20 @@
 import { useState } from 'react'
 import chatIcon from '../assets/chat.png'
+import { toast } from 'react-hot-toast';
+import { createRoomApi } from '../services/RoomService';
+import useChatContext from '../context/ChatContext';
+import { useNavigate } from 'react-router';
 
 
 const JoinCreateChat = () => {
 
-    const [detail, setDetail] = useState([
-        {
-            roomId: "",
-            userName: "Abc",
-        }
-    ]);
+    const [detail, setDetail] = useState({
+        roomId: "",
+        userName: "",
+    });
+    
+    // const { roomId, userName, setRoomId, setCurrentUser, setConnected } = useChatContext();
+    // const navigate = useNavigate();
 
     function handleFormInputChange(event){
         setDetail({
@@ -18,13 +23,40 @@ const JoinCreateChat = () => {
         });
     }
 
+    function validateForm(){
+        if(detail.roomId === "" || detail.userName === ""){
+            toast.error("Invalid Input");
+            return false;
+        }
+        return true;
+    }
+
     function joinChat(){
-
+        if(validateForm()){
+            console.log(detail);
+        }
     }
 
-    function createRoom(){
+    async function createRoom(){
+        if(validateForm()){
+            console.log(detail);
 
+            try{
+                const response = await createRoomApi(detail.roomId);
+                console.log(response);
+                toast.success("Room Created Successfully");
+                joinChat();
+            }catch(error){
+                console.log(error);
+                if (error.status == 400) {
+                    toast.error("Room  already exists !!");
+                } else {
+                  toast("Error in creating room");
+                }
+            }   
+        }
     }
+
 
 
 
@@ -62,13 +94,14 @@ const JoinCreateChat = () => {
                 value={detail.roomId}
                 type="text" 
                 id="name"
+                placeholder='Enter Room ID'
                 className="w-full dark:bg-gray-800 px-4 py-2 border dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
             {/* buttons */}
             <div className="flex justify-center gap-5 mt-4">
-                <button className="px-3 py-2 dark:bg-blue-500 hover:darkbg-blue-800 rounded-full">Join Room</button>
-                <button className="px-3 py-2 dark:bg-orange-500 hover:darkbg-orange-800 rounded-full">Create Room</button>
+                <button onClick={joinChat} className="px-3 py-2 dark:bg-blue-500 hover:darkbg-blue-800 rounded-full">Join Room</button>
+                <button onClick={createRoom} className="px-3 py-2 dark:bg-orange-500 hover:darkbg-orange-800 rounded-full">Create Room</button>
 
             </div>
 
