@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import chatIcon from '../assets/chat.png'
 import { toast } from 'react-hot-toast';
-import { createRoomApi } from '../services/RoomService';
+import { createRoomApi, joinChatApi } from '../services/RoomService';
 import useChatContext from '../context/ChatContext';
 import { useNavigate } from 'react-router';
 
@@ -13,8 +13,8 @@ const JoinCreateChat = () => {
         userName: "",
     });
     
-    // const { roomId, userName, setRoomId, setCurrentUser, setConnected } = useChatContext();
-    // const navigate = useNavigate();
+    const { roomId, userName, setRoomId, setCurrentUser, setConnected } = useChatContext();
+    const navigate = useNavigate();
 
     function handleFormInputChange(event){
         setDetail({
@@ -31,9 +31,25 @@ const JoinCreateChat = () => {
         return true;
     }
 
-    function joinChat(){
+    async function joinChat(){
         if(validateForm()){
-            console.log(detail);
+            // join chat
+            
+            try{
+                const room = await joinChatApi(detail.roomId);
+                toast.success("joined..");
+                setCurrentUser(detail.userName);
+                setRoomId(room.roomId);
+                setConnected(true);
+                navigate("/chat");
+            } catch(error){
+                if (error.status == 400) {
+                    toast.error(error.response.data);
+                  } else {
+                    toast.error("Error in joining room");
+                  }
+                  console.log(error);
+            }
         }
     }
 
@@ -45,7 +61,12 @@ const JoinCreateChat = () => {
                 const response = await createRoomApi(detail.roomId);
                 console.log(response);
                 toast.success("Room Created Successfully");
-                joinChat();
+                //join the room
+                setCurrentUser(detail.userName);
+                setRoomId(detail.roomId);
+                setConnected(true);
+                //forward to chatpage
+                navigate('/chat');
             }catch(error){
                 console.log(error);
                 if (error.status == 400) {
