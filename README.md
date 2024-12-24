@@ -1,5 +1,5 @@
 # ChatApp
-Spring Boot + React
+Spring Boot, Web Sockets + React
 
 Demo: [https://youtu.be/FAHRhcBF-Hs](https://youtu.be/FAHRhcBF-Hs)
 
