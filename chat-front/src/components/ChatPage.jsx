@@ -31,32 +31,11 @@ const ChatPage = () => {
         }
       }, [connected, roomId, currentUser]);
 
-    const [messages, setMessages] = useState([
-        {
-            content: "Hello ?",
-            sender: "Ajet",
-        },
-        {
-            content: "Hello ?",
-            sender: "Kumar",
-        },{
-            content: "Hello ?",
-            sender: "Ajet",
-        },{
-            content: "Hello ?",
-            sender: "babu",
-        },{
-            content: "Hello ?",
-            sender: "Ajet",
-        },
-
-    ]);
+    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     // const inputRef = useRef(null);
     const chatBoxRef = useRef(null);
     const [stompClient, setStompClient] = useState(null);
-    // const [roomId, setRoomId] = useState("");
-    // const [currentUser] = useState("Ajet");
 
     //page init:
     //messages ko load karne honge
@@ -90,35 +69,75 @@ const ChatPage = () => {
     //stompClient ko init karne honge
     //subscribe
 
+    // useEffect(() => {
+    //     const connectWebSocket = () => {
+    //     ///SockJS
+    //     const sock = new SockJS(`${baseURL}/chat`);
+    //     const client = Stomp.over(sock);
+
+    //     client.connect({}, () => {
+    //         setStompClient(client);
+
+    //         toast.success("connected");
+
+    //         client.subscribe(`/topic/room/${roomId}`, (message) => {
+    //         console.log(message);
+
+    //         const newMessage = JSON.parse(message.body);
+
+    //         setMessages((prev) => [...prev, newMessage]);
+
+    //         //rest of the work after success receiving the message
+    //         });
+    //     });
+    //     };
+
+    //     if (connected) {
+    //     connectWebSocket();
+    //     }
+
+    //     //stomp client
+    // }, [roomId]);
+
+    //-------
+
     useEffect(() => {
         const connectWebSocket = () => {
-        ///SockJS
-        const sock = new SockJS(`${baseURL}/chat`);
-        const client = Stomp.over(sock);
-
-        client.connect({}, () => {
-            setStompClient(client);
-
-            toast.success("connected");
-
-            client.subscribe(`/topic/room/${roomId}`, (message) => {
-            console.log(message);
-
-            const newMessage = JSON.parse(message.body);
-
-            setMessages((prev) => [...prev, newMessage]);
-
-            //rest of the work after success receiving the message
+            // Initialize SockJS and STOMP client
+            const sock = new SockJS(`${baseURL}/chat`);
+            const client = Stomp.over(sock);
+    
+            client.connect({}, () => {
+                setStompClient(client); // Set the client after a successful connection
+                toast.success("Connected to WebSocket");
+    
+                // Subscribe to the topic for the specific room
+                client.subscribe(`/topic/room/${roomId}`, (message) => {
+                    console.log("Received message:", message);
+                    const newMessage = JSON.parse(message.body);
+                    setMessages((prev) => [...prev, newMessage]);
+                });
             });
-        });
+    
+            return client;
         };
-
+    
         if (connected) {
-        connectWebSocket();
+            const client = connectWebSocket();
+    
+            // Cleanup function to avoid multiple subscriptions
+            return () => {
+                if (client) {
+                    client.disconnect();
+                    console.log("WebSocket disconnected");
+                }
+            };
         }
+    }, [roomId, connected]);
+    
 
-        //stomp client
-    }, [roomId]);
+    //--------
+
 
     //send message handle
 
