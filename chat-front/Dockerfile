@@ -11,8 +11,8 @@ RUN npm run build
 #stage 2: server react app
 
 FROM nginx:stable-alpine
-COPY --from=build /app/dist /usr/share/ngnix/html
+COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
-CMD ["ngnix", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]
 
 
