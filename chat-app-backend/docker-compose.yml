@@ -10,6 +10,9 @@ services:
       - mongo-db:/data/db
     networks:
       - app-network
+    environment:
+      - REACT_APP_API_URL=http://localhost:5174
+      - REACT_APP_WS_URL=ws://localhost:5174/chat
 
   boot-app:
     image: tejasayya7/chatback
@@ -34,7 +37,7 @@ services:
     ports:
       - "5173:80"
     environment:
-    - REACT_APP_API_URL=http://localhost:5174
+      - REACT_APP_API_URL=http://localhost:5174
     networks:
       - app-network
 
